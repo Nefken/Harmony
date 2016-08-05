@@ -1,0 +1,22 @@
+{
+  "name": "harmony-discord",
+  "version": "0.4.0",
+  "description": "",
+  "main": "harmony.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Candeles/harmony-discord.git"
+  },
+  "author": "Michael Candels <michael.candels@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Candeles/harmony-discord/issues"
+  },
+  "homepage": "https://github.com/Candeles/harmony-discord#readme",
+  "dependencies": {
+    "discord.js": "^8.1.0"
+  }
+}

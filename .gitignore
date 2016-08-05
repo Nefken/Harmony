@@ -1,0 +1,5 @@
+# npm keeps freaking out
+npm-debug*
+
+# dependencies
+node_modules/
