@@ -3,3 +3,6 @@ npm-debug*
 
 # dependencies
 node_modules/
+
+# hinters and linters
+.jshintrc
