@@ -1,5 +1,5 @@
-# npm keeps freaking out
-npm-debug*
+# debugging
+*.log
 
 # dependencies
 node_modules/
