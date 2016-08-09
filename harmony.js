@@ -28,8 +28,9 @@ var superLog = function (inputstring) {
 
 // BGN STATE CHANGE EVENT HANDLERS //
 Bot.on("ready", function () {
+	superLog("================================================================================");
 	superLog("status: ready");
-	superLog("Connected to:");;
+	superLog("Connected to:");
 	for(i = 0; i < Bot.servers.length; i++){
 		superLog("- " + Bot.servers[i].name);
 		for(j = 0; j < Bot.servers[i].channels.length; j++){
@@ -46,16 +47,79 @@ Bot.on("disconnected", function () {
 });
 // BGN STATE CHANGE EVENT HANDLERS //
 
+// BGN QUIET LOGGING //
+Bot.on("messageDeleted", function (msg, chn){
+	logStream.write(
+		"Message by " +
+		msg.author.username +
+		"#" +
+		msg.author.discriminator +
+		" deleted in " +
+		msg.server.name +
+		"#" +
+		chn.name +
+		": \'" +
+		msg.content +
+		"\'\n"
+	);
+});
+Bot.on("messageUpdated", function (oldmsg, newmsg) {
+	logStream.write(
+		"Message by " +
+		oldmsg.author.username +
+		"#" +
+		oldmsg.author.discriminator +
+		" updated in " +
+		oldmsg.server.name +
+		"#" +
+		oldmsg.channel.name +
+		": \'" +
+		oldmsg.content +
+		"\' ~ \'" +
+		newmsg.content +
+		"\'\n"
+	);
+});
+Bot.on("serverCreated", function (srv) {
+	logStream.write(
+		"Harmony has joined: \'" +
+		srv.name +
+		"\'\n"
+	);
+});
+Bot.on("serverDeleted", function (srv) {
+	logStream.write(
+		"Harmony has left: \'" +
+		srv.name +
+		"\'\n"
+	);
+});
+Bot.on("serverUpdated", function (oldsrv, newsrv) {
+	logStream.write(
+		"A server Harmony is in has changed names: \'" +
+		oldsrv.name +
+		"\' ~ \'" +
+		newsrv.name +
+		"\'\n"
+	);
+});
+//add more events
+// END QUIET LOGGING //
+
 // BGN MESSAGE RECEPTION //
 Bot.on("message", function (msg) {
 	// BGN MESSAGE PARSING //
 	logStream.write(
 		msg.author.username +
-		" sent in server " +
+		"#" +
+		msg.author.discriminator +
+		" sent in " +
 		msg.server.name +
+		"#" +
+		msg.channel.name +
 		": \'" +
 		msg.content +
-		"\'");
+		"\'\n");
 	// END MESSAGE PARSING //
 
 	// Split arguments following "!" by spaces
