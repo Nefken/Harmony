@@ -159,8 +159,22 @@ Bot.on("message", function (msg) {
 		// END GENERAL COMMANDS //
 
 		// BGN MOD TOOLS //
+		if (args[0] === "modtools") {
+			superLog("MODTOOLS ACTIVATED");
+			if (args[1] === "joinvoice") {
+				Bot.joinVoiceChannel(msg.server.channels.get("name", args[2]),
+					function () {
+						superLog("joined voice channel: " + args[2]);
+					}
+				);
+			}
+			if (args[1] === "play") {
+				superLog("playing file?");
+				Bot.voiceConnection.playFile("../harmony-discord-auth/Intro.mp3");
+			}
+		}
 		// END MOD TOOLS //
-}
+	}
 });
 // END MESSAGE RECEPTION //
 
