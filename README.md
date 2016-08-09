@@ -8,10 +8,11 @@ Harmony is currently under heavy development and is not intended to be used as i
 ### General commands
 - !help - shows available commands
 - !hello - Harmony will say hello to you.
-- !rtd [number of sides] - Dice rolls! *Originality!* (default is d20)
+- !rtd - Dice rolls! *Originality!* (default is d20)
+- !rtd xdy - i.e. 1d20
 
 ### modtool commands
-- !modtools help - shows help for modtools
+- 
 
 ## Usage
 
