@@ -6,7 +6,7 @@
 // BGN REQUIRE //
 var fs = require("fs");
 var Discord = require("discord.js");
-//var Harmonious = require("./lib/Harmonious.js");
+var YoutubeStream = require('youtube-audio-stream');
 var Auth = require("../harmony-discord-auth/auth.json");
 var Help = require("./help.json");
 // END REQUIRE //
@@ -17,13 +17,41 @@ var logStream = fs.createWriteStream("harmony_output.log", {"flags" : "a"});
 // END BOT CREATION & DEBUG LOGGING
 
 // BGN GLOBAL VARS //
+var music_queue = [];
+var isplaying = false;
+var ampitup = true;
 // END GLOBAL VARS //
 
 // BGN GLOBAL FUNCTIONS //
 var superLog = function (inputstring) {
 	console.log(inputstring);
 	logStream.write(inputstring + "\n");
-};
+}
+var playMusic = function () {
+	var channel = Bot.servers[0].channels.get("name", "music-only");
+	Bot.joinVoiceChannel(channel).then( (connection) => {
+		isplaying = true;
+		connection.playRawStream(
+			YoutubeStream(music_queue.shift()
+		)).then(intent => {
+			intent.on('end', () => {
+				isplaying = false;
+				if (music_queue.length != 0 || ampitup) {
+					playMusic();
+				} else {
+					Bot.leaveVoiceChannel(channel);
+				}
+			})
+			intent.on('error', () => {
+				console.log('Playback Error: ' + err);
+				isplaying = false;
+				Bot.leaveVoiceChannel(channel);
+			})
+		});
+	}).catch(err => {
+			console.log("error: " + err);
+	});
+}
 // END GLOBAL FUNCTIONS //
 
 // BGN STATE CHANGE EVENT HANDLERS //
@@ -160,17 +188,38 @@ Bot.on("message", function (msg) {
 
 		// BGN MOD TOOLS //
 		if (args[0] === "modtools") {
-			superLog("MODTOOLS ACTIVATED");
-			if (args[1] === "joinvoice") {
-				Bot.joinVoiceChannel(msg.server.channels.get("name", args[2]),
-					function () {
-						superLog("joined voice channel: " + args[2]);
-					}
+			if(Auth.mods.indexOf(msg.author.id) != -1) {
+				superLog("Modtools invoked by " +
+					msg.author.username + "#" +
+					msg.author.discriminator
 				);
-			}
-			if (args[1] === "play") {
-				superLog("playing file?");
-				Bot.voiceConnection.playFile("../harmony-discord-auth/Intro.mp3");
+				if (args[1] === "joinvoice") {
+					Bot.joinVoiceChannel(msg.server.channels.get("name", args[2]),
+						function () {
+							superLog("joined voice channel: " + args[2]);
+						}
+					);
+				}
+				if (args[1] === "play" && !isplaying) {
+					ampitup = true;
+					playMusic();
+				}
+				if (args[1] === "queue") {
+					music_queue.push(args[2]);
+				}
+				if (args[1] === "pause") {
+					Bot.voiceConnection.pause();
+				}
+				if (args[1] === "resume") {
+					Bot.voiceConnection.resume();
+				}/*
+				if (args[1] === "skip") {
+					Bot.voiceConnection.destroy();
+				}
+				if (args[1] === "stop") {
+					ampitup = false;
+					Bot.voiceConnection.stopPlaying();
+				}*/
 			}
 		}
 		// END MOD TOOLS //
