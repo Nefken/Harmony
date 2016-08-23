@@ -1,49 +1,63 @@
 # Harmony, a Discord bot based on Discord.js
+*Dev note: Harmony is currently meant for only one discord server at a time.*
 
 ## Development status
-Harmony is currently under heavy development and is not intended to be used as is yet. If you have issues using Harmony, please be patient.
+TODO for vx.x.x: Get to v1.0.0
+* Update help.json
+* Update options_example.json
 
-## Available commands
+v1.0.0 - Harmony works, however non-breaking changes will be coming.
+TODO for v1.0.1:
+* Add multi-server support
 
-### General commands
-- !help - shows available commands
-- !hello - Harmony will say hello to you.
-- !rtd - Dice rolls! *Originality!* (default is d20)
-- !rtd xdy - i.e. 1d20
+## Features
+* Message logging
+* Music playback via YouTube
 
-### modtool commands
--
-
-## Usage
+## Installation
 
 To run this bot from your own node terminal, you must read this section. If it is not helpful, open an issue above.
 
-To use this bot, you must have a folder that looks something like this:
+Harmony is not yet on npm, so you must clone this repo first. You will end up with a folder setup like so:
 
 ```
 harmony-discord/
-└── json/
-    └── auth.json
+├── img/
+└─┬ json/
+  └── options.json
 ```
 
-auth.json is critical. You must go to
+options.json is critical; an example file is provided. You must go to
 
 https://discordapp.com/login?redirect_to=/developers/applications/me
 
-and register your bot. Ensure you create an app bot user.
+and register your bot. Ensure you create an app bot user. From this, you can use the bot
 
-Finally auth.json must look like so:
+options.json must look like so:
 ```json
 {
-	"token"		:	"YOUR CLIENT ID"
+  "auth" : {
+    "token": "<YOUR SECRET TOKEN>"
+  },
+  ...
 }
 ```
+Then, get ffmpeg in some way, and have it installed on your PATH. Run
+```
+npm install
+```
 
-Do this, and you should be all set to run Harmony from the harmony-discord/ directory via the command:
+and everything should be ready.
+
+## Usage
 
 ```
 node harmony.js
 ```
+
+Then go to the following link to add Harmony to your server (replace YOUR_CLIENT_ID with your bot's client id):
+
+https://discordapp.com/oauth2/authorize?client_id=YOUR_CLIENT_ID&scope=bot&permissions=0
 
 ## Contribution
 

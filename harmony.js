@@ -6,21 +6,22 @@
 // BGN REQUIRE //
 var fs = require("fs");
 var Discord = require("discord.js");
-var YoutubeStream = require('youtube-audio-stream');
+var YoutubeStream = require("youtube-audio-stream");
+var MusicQueue = require("./lib/MusicQueue.js")
 var Opt = require("./json/options.json");
 var Help = require("./json/help.json");
 // END REQUIRE //
 
 // BGN BOT CREATION & DEBUG LOGGING
 var Bot = new Discord.Client();
+//var Queue = new MusicQueue;
 var logStream = fs.createWriteStream("harmony_output.log", {"flags" : "a"});
 // END BOT CREATION & DEBUG LOGGING
 
 // BGN GLOBAL VARS //
-var music_queue = [];
-// > one music queue, save this for one server unless improved
-var isplaying = false;
 var ampitup = true; // "do I keep playing the queue or not"
+var isplaying = false;
+var music_queue = [];
 // END GLOBAL VARS //
 
 // BGN GLOBAL FUNCTIONS //
@@ -53,6 +54,9 @@ var playMusic = function (srv) {
 			console.log("error: " + err);
 	});
 }
+var queueMusic = function (srvid, url) {
+	music_queue.push(url);
+}
 // END GLOBAL FUNCTIONS //
 
 // BGN STATE CHANGE EVENT HANDLERS //
@@ -62,9 +66,12 @@ Bot.on("ready", function () {
 	superLog("Connected to:");
 	for(i = 0; i < Bot.servers.length; i++){
 		superLog("- " + Bot.servers[i].name);
-		for(j = 0; j < Bot.servers[i].channels.length; j++){
-			superLog("  └──" + Bot.servers[i].channels[j].name);
+		for(j = 0; j < Bot.servers[i].channels.length - 1; j++){
+			superLog("  ├──" + Bot.servers[i].channels[j].name);
 		}
+		superLog("  └──" +
+			Bot.servers[i].channels[Bot.servers[i].channels.length - 2].name
+		);
 	}
 });
 Bot.on("disconnected", function () {
@@ -212,7 +219,7 @@ Bot.on("message", function (msg) {
 				}
 			}
 			if (args[1] === "queue") {
-				music_queue.push(args[2]);
+				queueMusic(msg.server.id, args[2]);
 			}
 			if (args[1] === "pause") {
 				Bot.voiceConnection.pause();
@@ -235,9 +242,10 @@ Bot.on("message", function (msg) {
 });
 // END MESSAGE RECEPTION //
 
-//Bot.login(Opt.username, Opt.password);
+// BGN FOOTER //
 Bot.loginWithToken(Opt.auth.token);
 
 process.on('uncaughtException', function (err) {
   console.log('Caught exception: ' + err);
 });
+// END FOOTER //
