@@ -1,0 +1,4 @@
+{
+	"text"			:	"Hey, I'm Harmony!\nThese are the available general commands:\n!coinflip - heads/tails\n!help - Shows this menu\n!hello - I will say hello to you!\n!music (play | queue YOUTUBE_LINK | pause | resume | skip | stop)\n!modtools - are for mods only!\n!rtd xdy - dice rolls, default 20",
+	"modtools"	:	"Hey, I'm Harmony!\nThese are the available modtool commands:\n!modtools help - Shows this menu\n!modtools timeInServer [serverid] [userid] - Shows the time in milliseconds that the user has been in the server"
+}

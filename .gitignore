@@ -6,3 +6,8 @@ node_modules/
 
 # hinters and linters
 .jshintrc
+
+# Harmony specific
+options.json
+lib/
+# > lib is temporary until I write a usable piece of music queuing code 

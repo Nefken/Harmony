@@ -1,4 +1,0 @@
-{
-	"text"			:	"Hey, I'm Harmony!\nThese are the available general commands:\n!help - Shows this menu\n!hello - I will say hello to you!\n!rtd [number of sides, default 20] - dice rolls",
-	"modtools"	:	"Hey, I'm Harmony!\nThese are the available modtool commands:\n!modtools help - Shows this menu\n!modtools timeInServer [serverid] [userid] - Shows the time in milliseconds that the user has been in the server"
-}

@@ -6,20 +6,22 @@
 // BGN REQUIRE //
 var fs = require("fs");
 var Discord = require("discord.js");
-var YoutubeStream = require('youtube-audio-stream');
-var Auth = require("../harmony-discord-auth/auth.json");
-var Help = require("./help.json");
+var YoutubeStream = require("youtube-audio-stream");
+var MusicQueue = require("./lib/MusicQueue.js")
+var Opt = require("./json/options.json");
+var Help = require("./json/help.json");
 // END REQUIRE //
 
 // BGN BOT CREATION & DEBUG LOGGING
 var Bot = new Discord.Client();
+//var Queue = new MusicQueue;
 var logStream = fs.createWriteStream("harmony_output.log", {"flags" : "a"});
 // END BOT CREATION & DEBUG LOGGING
 
 // BGN GLOBAL VARS //
-var music_queue = [];
+var ampitup = true; // "do I keep playing the queue or not"
 var isplaying = false;
-var ampitup = true;
+var music_queue = [];
 // END GLOBAL VARS //
 
 // BGN GLOBAL FUNCTIONS //
@@ -27,16 +29,29 @@ var superLog = function (inputstring) {
 	console.log(inputstring);
 	logStream.write(inputstring + "\n");
 }
-var playMusic = function () {
-	var channel = Bot.servers[0].channels.get("name", "music-only");
+var isModOrAdmin = function (id) {
+	if(Opt.users.mods.indexOf(id) != -1 ||
+		Opt.users.admins.indexOf(id) != -1) {
+		return true;
+	} else {
+		return false;
+	}
+}
+var isAdmin = function (id) {
+	if(Opt.users.admins.indexOf(id) != -1) {
+		return true;
+	} else return false;
+}
+var playMusic = function (srv) {
+	var channel = srv.channels.get("name", Opt.music.voiceChannel);
 	Bot.joinVoiceChannel(channel).then( (connection) => {
 		isplaying = true;
 		connection.playRawStream(
-			YoutubeStream(music_queue.shift()
-		)).then(intent => {
+			YoutubeStream(music_queue.shift())
+		).then(intent => {
 			intent.on('end', () => {
 				isplaying = false;
-				if (music_queue.length != 0 || ampitup) {
+				if (music_queue.length != 0 && ampitup) {
 					playMusic();
 				} else {
 					Bot.leaveVoiceChannel(channel);
@@ -52,6 +67,10 @@ var playMusic = function () {
 			console.log("error: " + err);
 	});
 }
+var queueMusic = function (srvid, url) {
+	music_queue.push(url);
+	//to be enhanced
+}
 // END GLOBAL FUNCTIONS //
 
 // BGN STATE CHANGE EVENT HANDLERS //
@@ -61,9 +80,12 @@ Bot.on("ready", function () {
 	superLog("Connected to:");
 	for(i = 0; i < Bot.servers.length; i++){
 		superLog("- " + Bot.servers[i].name);
-		for(j = 0; j < Bot.servers[i].channels.length; j++){
-			superLog("  └──" + Bot.servers[i].channels[j].name);
+		for(j = 0; j < Bot.servers[i].channels.length - 1; j++){
+			superLog("  ├──" + Bot.servers[i].channels[j].name);
 		}
+		superLog("  └──" +
+			Bot.servers[i].channels[Bot.servers[i].channels.length - 2].name
+		);
 	}
 });
 Bot.on("disconnected", function () {
@@ -131,13 +153,13 @@ Bot.on("serverUpdated", function (oldsrv, newsrv) {
 		"\'\n"
 	);
 });
-//add more events
+// TODO: add more events
 // END QUIET LOGGING //
 
 // BGN MESSAGE RECEPTION //
 Bot.on("message", function (msg) {
 	// BGN MESSAGE PARSING //
-	logStream.write(
+	logStream.write( // put it in the log, but not the console
 		msg.author.username +
 		"#" +
 		msg.author.discriminator +
@@ -150,19 +172,35 @@ Bot.on("message", function (msg) {
 		"\'\n");
 	// END MESSAGE PARSING //
 
-	// Split arguments following "!" by spaces
+	// BGN COMMAND PARSING //
 	if (msg.content.indexOf("!") === 0) {
+		// Split arguments following "!" by spaces
+		// > this could bite me in the future if spaces are not to be ignored
 		var args = msg.content.substring(1).split(" ");
 
 		// BGN TESTING COMMANDS //
 		if (args[0] === "ping") {
-			Bot.reply(msg, "hello!");
+			Bot.sendMessage(msg.channel, "pong!");
 		}
 		// END TESTING COMMANDS //
 
 		// BGN GENERAL COMMANDS //
-		// standard rtd command: !rtd (1d20) or !rtd xdy
+		if (args [0] === "coinflip") {
+			var dx = Math.floor(Math.random() * (2) + 1);
+			if (dx === 1)	Bot.sendMessage(msg.channel, "heads!");
+			else if (dx === 2 ) Bot.sendMessage(msg.channel, "tails!");
+			else Bot.sendMessage(msg.channel, "Whoops, I dropped the coin!");
+		}
+		if (args[0] === "hello") {
+			Bot.reply(msg, "hello!");
+		}
+		if (args[0] === "help") {
+			if (args.length === 1) {
+				Bot.sendMessage(msg.channel, Help.text);
+			}
+		}
 		if (args[0] === "rtd") {
+			// standard rtd command: !rtd (1d20) or !rtd xdy
 			if (args.length > 1) {
 				var rtdargs = args[1].split("d");
 				var dnum = rtdargs[0];
@@ -170,7 +208,7 @@ Bot.on("message", function (msg) {
 				// cap number of dice to 10 because no one needs that power
 				if (dnum > 10) { dnum = 10; }
 				for (i=0; i<dnum; i++) {
-					var dx = Math.floor(Math.random() * (snum - 1) + 1);
+					var dx = Math.floor(Math.random() * (snum) + 1);
 					Bot.sendMessage(
 						msg.channel,
 						msg.author.toString() + " rolled: " + dx
@@ -188,44 +226,60 @@ Bot.on("message", function (msg) {
 
 		// BGN MOD TOOLS //
 		if (args[0] === "modtools") {
-			if(Auth.mods.indexOf(msg.author.id) != -1) {
+			if(Opt.users.mods.indexOf(msg.author.id) != -1) {
 				superLog("Modtools invoked by " +
 					msg.author.username + "#" +
 					msg.author.discriminator
 				);
-				if (args[1] === "joinvoice") {
-					Bot.joinVoiceChannel(msg.server.channels.get("name", args[2]),
-						function () {
-							superLog("joined voice channel: " + args[2]);
-						}
-					);
-				}
-				if (args[1] === "play" && !isplaying) {
-					ampitup = true;
-					playMusic();
+			}
+			// modtools here
+		}
+		// END MOD TOOLS //
+
+		// BGN MUSIC TOOLS //
+		if (args[0] === "music") {
+			if ((Opt.music.options.modUseOnly && isModOrAdmin(msg.author.id)) ||
+			 !Opt.music.options.modUseOnly) {
+			// Check if music is privileged
+				if (args[1] === "play") {
+					if (!isplaying) {
+						ampitup = true;
+						playMusic(msg.server);
+					} else {
+						Bot.voiceConnection.resume();
+					}
 				}
 				if (args[1] === "queue") {
-					music_queue.push(args[2]);
+					queueMusic(msg.server.id, args[2]);
 				}
 				if (args[1] === "pause") {
 					Bot.voiceConnection.pause();
 				}
 				if (args[1] === "resume") {
 					Bot.voiceConnection.resume();
-				}/*
+				}
 				if (args[1] === "skip") {
-					Bot.voiceConnection.destroy();
+					Bot.voiceConnection.stopPlaying();
 				}
 				if (args[1] === "stop") {
 					ampitup = false;
-					Bot.voiceConnection.stopPlaying();
-				}*/
+					isplaying = false;
+					Bot.voiceConnection.destroy();
+				}
+			} else {
+				Bot.sendMessage(msg.channel, "Playing music is privileged to mods only.");
 			}
 		}
-		// END MOD TOOLS //
+		// END MUSIC TOOLS //
 	}
+	// END COMMAND PARSING
 });
 // END MESSAGE RECEPTION //
 
-//Bot.login(Auth.username, Auth.password);
-Bot.loginWithToken(Auth.token);
+// BGN FOOTER //
+Bot.loginWithToken(Opt.auth.token);
+
+process.on('uncaughtException', function (err) {
+  console.log('Caught exception: ' + err);
+});
+// END FOOTER //
