@@ -2,9 +2,6 @@
 *Dev note: Harmony is currently meant for only one discord server at a time.*
 
 ## Development status
-TODO for vx.x.x: Get to v1.0.0
-* Update help.json
-* Add privileged music playing
 
 v1.0.0 - Harmony works as a baseline, however non-breaking changes will be coming.
 TODO for v1.0.1:

@@ -180,11 +180,25 @@ Bot.on("message", function (msg) {
 
 		// BGN TESTING COMMANDS //
 		if (args[0] === "ping") {
-			Bot.reply(msg, "hello!");
+			Bot.sendMessage(msg.channel, "pong!");
 		}
 		// END TESTING COMMANDS //
 
 		// BGN GENERAL COMMANDS //
+		if (args [0] === "coinflip") {
+			var dx = Math.floor(Math.random() * (2) + 1);
+			if (dx === 1)	Bot.sendMessage(msg.channel, "heads!");
+			else if (dx === 2 ) Bot.sendMessage(msg.channel, "tails!");
+			else Bot.sendMessage(msg.channel, "Whoops, I dropped the coin!");
+		}
+		if (args[0] === "hello") {
+			Bot.reply(msg, "hello!");
+		}
+		if (args[0] === "help") {
+			if (args.length === 1) {
+				Bot.sendMessage(msg.channel, Help.text);
+			}
+		}
 		if (args[0] === "rtd") {
 			// standard rtd command: !rtd (1d20) or !rtd xdy
 			if (args.length > 1) {
@@ -194,7 +208,7 @@ Bot.on("message", function (msg) {
 				// cap number of dice to 10 because no one needs that power
 				if (dnum > 10) { dnum = 10; }
 				for (i=0; i<dnum; i++) {
-					var dx = Math.floor(Math.random() * (snum - 1) + 1);
+					var dx = Math.floor(Math.random() * (snum) + 1);
 					Bot.sendMessage(
 						msg.channel,
 						msg.author.toString() + " rolled: " + dx
