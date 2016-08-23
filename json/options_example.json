@@ -1,5 +1,21 @@
 {
-  "token" : "<YOUR TOKEN HERE>",
-  "email" : "<YOUR BOT EMAIL HERE>",
-  "password" : "<YOUR BOT PASSWORD HERE>"
+  "auth" : {
+    "token": "YOUR CLIENT ID"
+  },
+  "music" :{
+    "voiceChannel" : "harmony <- THE DEFAULT VOICE CHANNEL",
+    "options" : {
+      "modUseOnly" : "0"
+    }
+  },
+  "users" : {
+    "admins" : [
+      "YOUR ID"
+    ],
+    "mods" : [
+      "YOUR ID",
+      "A MODERATOR'S ID",
+      "ANOTHER MODERATOR'S ID"
+    ]
+  }
 }
