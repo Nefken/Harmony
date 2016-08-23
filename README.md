@@ -12,19 +12,18 @@ Harmony is currently under heavy development and is not intended to be used as i
 - !rtd xdy - i.e. 1d20
 
 ### modtool commands
-- 
+-
 
 ## Usage
 
 To run this bot from your own node terminal, you must read this section. If it is not helpful, open an issue above.
 
-To use this bot, you must have two folders that look something like this:
+To use this bot, you must have a folder that looks something like this:
 
 ```
 harmony-discord/
-└── harmony.js, README.md, etc.
-harmony-discord-auth/
-└── auth.json
+└── json/
+    └── auth.json
 ```
 
 auth.json is critical. You must go to

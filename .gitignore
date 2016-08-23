@@ -6,3 +6,6 @@ node_modules/
 
 # hinters and linters
 .jshintrc
+
+# Harmony specific
+options.json
