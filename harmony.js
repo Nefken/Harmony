@@ -29,6 +29,19 @@ var superLog = function (inputstring) {
 	console.log(inputstring);
 	logStream.write(inputstring + "\n");
 }
+var isModOrAdmin = function (id) {
+	if(Opt.users.mods.indexOf(id) != -1 ||
+		Opt.users.admins.indexOf(id) != -1) {
+		return true;
+	} else {
+		return false;
+	}
+}
+var isAdmin = function (id) {
+	if(Opt.users.admins.indexOf(id) != -1) {
+		return true;
+	} else return false;
+}
 var playMusic = function (srv) {
 	var channel = srv.channels.get("name", Opt.music.voiceChannel);
 	Bot.joinVoiceChannel(channel).then( (connection) => {
@@ -56,6 +69,7 @@ var playMusic = function (srv) {
 }
 var queueMusic = function (srvid, url) {
 	music_queue.push(url);
+	//to be enhanced
 }
 // END GLOBAL FUNCTIONS //
 
@@ -210,30 +224,36 @@ Bot.on("message", function (msg) {
 
 		// BGN MUSIC TOOLS //
 		if (args[0] === "music") {
-			if (args[1] === "play") {
-				if (!isplaying) {
-					ampitup = true;
-					playMusic(msg.server);
-				} else {
+			if ((Opt.music.options.modUseOnly && isModOrAdmin(msg.author.id)) ||
+			 !Opt.music.options.modUseOnly) {
+			// Check if music is privileged
+				if (args[1] === "play") {
+					if (!isplaying) {
+						ampitup = true;
+						playMusic(msg.server);
+					} else {
+						Bot.voiceConnection.resume();
+					}
+				}
+				if (args[1] === "queue") {
+					queueMusic(msg.server.id, args[2]);
+				}
+				if (args[1] === "pause") {
+					Bot.voiceConnection.pause();
+				}
+				if (args[1] === "resume") {
 					Bot.voiceConnection.resume();
 				}
-			}
-			if (args[1] === "queue") {
-				queueMusic(msg.server.id, args[2]);
-			}
-			if (args[1] === "pause") {
-				Bot.voiceConnection.pause();
-			}
-			if (args[1] === "resume") {
-				Bot.voiceConnection.resume();
-			}
-			if (args[1] === "skip") {
-				Bot.voiceConnection.stopPlaying();
-			}
-			if (args[1] === "stop") {
-				ampitup = false;
-				isplaying = false;
-				Bot.voiceConnection.destroy();
+				if (args[1] === "skip") {
+					Bot.voiceConnection.stopPlaying();
+				}
+				if (args[1] === "stop") {
+					ampitup = false;
+					isplaying = false;
+					Bot.voiceConnection.destroy();
+				}
+			} else {
+				Bot.sendMessage(msg.channel, "Playing music is privileged to mods only.");
 			}
 		}
 		// END MUSIC TOOLS //
