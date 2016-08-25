@@ -1,5 +1,4 @@
 # Harmony, a Discord bot based on Discord.js
-*Dev note: Harmony is currently meant for only one discord server at a time.*
 
 ## Development status
 

@@ -21,7 +21,6 @@ var logStream = fs.createWriteStream("harmony_output.log", {"flags" : "a"});
 // BGN GLOBAL VARS //
 var ampitup = true; // "do I keep playing the queue or not"
 var isplaying = false;
-var music_queue = [];
 var ServerQueues = new MusicQueue;
 // END GLOBAL VARS //
 
