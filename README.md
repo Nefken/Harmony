@@ -31,7 +31,7 @@ options.json is critical; an example file is provided. You must go to
 
 https://discordapp.com/login?redirect_to=/developers/applications/me
 
-and register your bot. Ensure you create an app bot user. From this, you can use the bot
+and register your bot. Ensure you create an app bot user. You will use these credentials to log your bot into Discord.
 
 options.json must look like so:
 ```json
