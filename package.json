@@ -1,6 +1,6 @@
 {
   "name": "harmony-discord",
-  "version": "1.0.0 Alpha",
+  "version": "1.0.1 Alpha",
   "description": "",
   "main": "harmony.js",
   "scripts": {
