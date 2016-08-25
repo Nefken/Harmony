@@ -22,6 +22,7 @@ var logStream = fs.createWriteStream("harmony_output.log", {"flags" : "a"});
 var ampitup = true; // "do I keep playing the queue or not"
 var isplaying = false;
 var music_queue = [];
+var ServerQueues = new MusicQueue;
 // END GLOBAL VARS //
 
 // BGN GLOBAL FUNCTIONS //
@@ -54,7 +55,7 @@ var playMusic = function (srv) {
 	Bot.joinVoiceChannel(channel).then( (connection) => {
 		isplaying = true;
 		connection.playRawStream(
-			YoutubeStream(music_queue.shift())
+			YoutubeStream(ServerQueues.playSong(srv.id))
 		).then(intent => {
 			intent.on('end', () => {
 				isplaying = false;
@@ -75,7 +76,8 @@ var playMusic = function (srv) {
 	});
 }
 var queueMusic = function (srvid, url) {
-	music_queue.push(url);
+	ServerQueues.addServer(srvid);
+	ServerQueues.addToServerQueue(srvid, url);
 	//to be enhanced
 }
 // END GLOBAL FUNCTIONS //
@@ -102,62 +104,37 @@ Bot.on("disconnected", function () {
 	//exit node.js with an error
 	process.exit(1);
 });
-// BGN STATE CHANGE EVENT HANDLERS //
+// END STATE CHANGE EVENT HANDLERS //
 
 // BGN QUIET LOGGING //
 Bot.on("messageDeleted", function (msg, chn){
 	logStream.write(
-		"Message by " +
-		msg.author.username +
-		"#" +
-		msg.author.discriminator +
-		" deleted in " +
-		msg.server.name +
-		"#" +
-		chn.name +
-		": \'" +
-		msg.content +
-		"\'\n"
+		"Message by " + msg.author.username + "#" + msg.author.discriminator +
+		" deleted in " + msg.server.name + "#" + chn.name +
+		": \'" + msg.content + "\'\n" // > TODO: check logs to see if this \n is necessary
 	);
 });
 Bot.on("messageUpdated", function (oldmsg, newmsg) {
 	logStream.write(
-		"Message by " +
-		oldmsg.author.username +
-		"#" +
-		oldmsg.author.discriminator +
-		" updated in " +
-		oldmsg.server.name +
-		"#" +
-		oldmsg.channel.name +
-		": \'" +
-		oldmsg.content +
-		"\' ~ \'" +
-		newmsg.content +
-		"\'\n"
+		"Message by " + oldmsg.author.username + "#" + oldmsg.author.discriminator +
+		" updated in " + oldmsg.server.name + "#" + oldmsg.channel.name +
+		": \'" + oldmsg.content + "\' ~ \'" + newmsg.content + "\'\n"
 	);
 });
 Bot.on("serverCreated", function (srv) {
 	logStream.write(
-		"Harmony has joined: \'" +
-		srv.name +
-		"\'\n"
+		"Harmony has joined: \'" + srv.name + "\'\n"
 	);
 });
 Bot.on("serverDeleted", function (srv) {
 	logStream.write(
-		"Harmony has left: \'" +
-		srv.name +
-		"\'\n"
+		"Harmony has left: \'" + srv.name + "\'\n"
 	);
 });
 Bot.on("serverUpdated", function (oldsrv, newsrv) {
 	logStream.write(
 		"A server Harmony is in has changed names: \'" +
-		oldsrv.name +
-		"\' ~ \'" +
-		newsrv.name +
-		"\'\n"
+		oldsrv.name + "\' ~ \'" + newsrv.name + "\'\n"
 	);
 });
 // TODO: add more events
@@ -184,6 +161,9 @@ Bot.on("message", function (msg) {
 		// BGN TESTING COMMANDS //
 		if (args[0] === "ping") {
 			Bot.sendMessage(msg.channel, "pong!");
+		}
+		if (args[0] === "pong") {
+			ServerQueues.printServerList();
 		}
 		// END TESTING COMMANDS //
 

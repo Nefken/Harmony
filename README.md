@@ -4,23 +4,24 @@
 ## Development status
 
 v1.0.0 - Harmony works as a baseline, however non-breaking changes will be coming.
+
 TODO for v1.0.1:
-* Add multi-server support
 * Recreate modtool command list
+* Update help and examples
 
 ## Features
 * Message logging
-* Music playback via YouTube
+* Music playback via YouTube with multi-server support
 
 ## Installation
 
-To run this bot from your own node terminal, you must read this section. If it is not helpful, open an issue above.
+To run this bot from your own node terminal, read this section. If it is not helpful, open an issue above.
 
 Harmony is not yet on npm, so you must clone this repo first. You will end up with a folder setup like so:
 
 ```
 harmony-discord/
-├── img/
+├── harmony.js, some other files
 └─┬ json/
   └── options.json
 ```
