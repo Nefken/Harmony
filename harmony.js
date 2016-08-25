@@ -157,14 +157,17 @@ Bot.on("message", function (msg) {
 		// Split arguments following "!" by spaces
 		// > this could bite me in the future if spaces are not to be ignored
 		var args = msg.content.substring(1).split(" ");
+		while (args.indexOf('') != -1) {
+			args.splice(args.indexOf(''), 1);
+		}
 
 		// BGN TESTING COMMANDS //
 		if (args[0] === "ping") {
 			Bot.sendMessage(msg.channel, "pong!");
 		}
-		if (args[0] === "pong") {
+		/*if (args[0] === "pong") {
 			ServerQueues.printServerList();
-		}
+		}*/
 		// END TESTING COMMANDS //
 
 		// BGN GENERAL COMMANDS //
