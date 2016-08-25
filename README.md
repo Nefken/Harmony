@@ -3,12 +3,12 @@
 
 ## Development status
 
-v1.0.0 - Harmony works as a baseline, however non-breaking changes will be coming.
+* v1.0.0 - Harmony works as a baseline, however non-breaking changes will be coming.
+* v1.0.1 - Added multi-server support, fixed bugs
 
-TODO for v1.0.1:
-* Fix empty string bug
-* Recreate modtool command list
-* Update help and examples
+* TODO for v1.0.2:
+ * Recreate modtool command list
+ * Update help and examples
 
 ## Features
 * Message logging
