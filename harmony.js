@@ -22,6 +22,7 @@ var logStream = fs.createWriteStream("harmony_output.log", {"flags" : "a"});
 var ampitup = true; // "do I keep playing the queue or not"
 var isplaying = false;
 var music_queue = [];
+var ServerQueues = new MusicQueue;
 // END GLOBAL VARS //
 
 // BGN GLOBAL FUNCTIONS //
@@ -38,16 +39,23 @@ var isModOrAdmin = function (id) {
 	}
 }
 var isAdmin = function (id) {
-	if(Opt.users.admins.indexOf(id) != -1) {
-		return true;
-	} else return false;
+	if(Opt.users.admins.indexOf(id) != -1) return true;
+	else return false;
+}
+var isCommandChannel = function (name) {
+	if (Opt.text.channel === name) return true;
+	else return false;
+}
+var isMusicChannel = function (name) {
+	if (Opt.music.channel === name) return true;
+	else return false;
 }
 var playMusic = function (srv) {
-	var channel = srv.channels.get("name", Opt.music.voiceChannel);
+	var channel = srv.channels.get("name", Opt.music.channel);
 	Bot.joinVoiceChannel(channel).then( (connection) => {
 		isplaying = true;
 		connection.playRawStream(
-			YoutubeStream(music_queue.shift())
+			YoutubeStream(ServerQueues.playSong(srv.id))
 		).then(intent => {
 			intent.on('end', () => {
 				isplaying = false;
@@ -68,7 +76,8 @@ var playMusic = function (srv) {
 	});
 }
 var queueMusic = function (srvid, url) {
-	music_queue.push(url);
+	ServerQueues.addServer(srvid);
+	ServerQueues.addToServerQueue(srvid, url);
 	//to be enhanced
 }
 // END GLOBAL FUNCTIONS //
@@ -84,7 +93,7 @@ Bot.on("ready", function () {
 			superLog("  ├──" + Bot.servers[i].channels[j].name);
 		}
 		superLog("  └──" +
-			Bot.servers[i].channels[Bot.servers[i].channels.length - 2].name
+			Bot.servers[i].channels[Bot.servers[i].channels.length - 1].name
 		);
 	}
 });
@@ -95,62 +104,37 @@ Bot.on("disconnected", function () {
 	//exit node.js with an error
 	process.exit(1);
 });
-// BGN STATE CHANGE EVENT HANDLERS //
+// END STATE CHANGE EVENT HANDLERS //
 
 // BGN QUIET LOGGING //
 Bot.on("messageDeleted", function (msg, chn){
 	logStream.write(
-		"Message by " +
-		msg.author.username +
-		"#" +
-		msg.author.discriminator +
-		" deleted in " +
-		msg.server.name +
-		"#" +
-		chn.name +
-		": \'" +
-		msg.content +
-		"\'\n"
+		"Message by " + msg.author.username + "#" + msg.author.discriminator +
+		" deleted in " + msg.server.name + "#" + chn.name +
+		": \'" + msg.content + "\'\n" // > TODO: check logs to see if this \n is necessary
 	);
 });
 Bot.on("messageUpdated", function (oldmsg, newmsg) {
 	logStream.write(
-		"Message by " +
-		oldmsg.author.username +
-		"#" +
-		oldmsg.author.discriminator +
-		" updated in " +
-		oldmsg.server.name +
-		"#" +
-		oldmsg.channel.name +
-		": \'" +
-		oldmsg.content +
-		"\' ~ \'" +
-		newmsg.content +
-		"\'\n"
+		"Message by " + oldmsg.author.username + "#" + oldmsg.author.discriminator +
+		" updated in " + oldmsg.server.name + "#" + oldmsg.channel.name +
+		": \'" + oldmsg.content + "\' ~ \'" + newmsg.content + "\'\n"
 	);
 });
 Bot.on("serverCreated", function (srv) {
 	logStream.write(
-		"Harmony has joined: \'" +
-		srv.name +
-		"\'\n"
+		"Harmony has joined: \'" + srv.name + "\'\n"
 	);
 });
 Bot.on("serverDeleted", function (srv) {
 	logStream.write(
-		"Harmony has left: \'" +
-		srv.name +
-		"\'\n"
+		"Harmony has left: \'" + srv.name + "\'\n"
 	);
 });
 Bot.on("serverUpdated", function (oldsrv, newsrv) {
 	logStream.write(
 		"A server Harmony is in has changed names: \'" +
-		oldsrv.name +
-		"\' ~ \'" +
-		newsrv.name +
-		"\'\n"
+		oldsrv.name + "\' ~ \'" + newsrv.name + "\'\n"
 	);
 });
 // TODO: add more events
@@ -159,33 +143,35 @@ Bot.on("serverUpdated", function (oldsrv, newsrv) {
 // BGN MESSAGE RECEPTION //
 Bot.on("message", function (msg) {
 	// BGN MESSAGE PARSING //
-	logStream.write( // put it in the log, but not the console
-		msg.author.username +
-		"#" +
-		msg.author.discriminator +
-		" sent in " +
-		msg.server.name +
-		"#" +
-		msg.channel.name +
-		": \'" +
-		msg.content +
-		"\'\n");
+	logStream.write(
+		// put it in the log, but not the console
+		msg.author.username + "#" + msg.author.discriminator +
+		" sent in " + msg.server.name + "#" + msg.channel.name +
+		": \'" + msg.content + "\'\n"
+	);
 	// END MESSAGE PARSING //
 
 	// BGN COMMAND PARSING //
-	if (msg.content.indexOf("!") === 0) {
+	if (msg.content.indexOf("!") === 0 && (!Opt.text.options.oneChannelOnly ||
+		(isCommandChannel(msg.channel.name) && Opt.text.options.oneChannelOnly))) {
 		// Split arguments following "!" by spaces
 		// > this could bite me in the future if spaces are not to be ignored
 		var args = msg.content.substring(1).split(" ");
+		while (args.indexOf('') != -1) {
+			args.splice(args.indexOf(''), 1);
+		}
 
 		// BGN TESTING COMMANDS //
 		if (args[0] === "ping") {
 			Bot.sendMessage(msg.channel, "pong!");
 		}
+		/*if (args[0] === "pong") {
+			ServerQueues.printServerList();
+		}*/
 		// END TESTING COMMANDS //
 
 		// BGN GENERAL COMMANDS //
-		if (args [0] === "coinflip") {
+		if (args[0] === "coinflip") {
 			var dx = Math.floor(Math.random() * (2) + 1);
 			if (dx === 1)	Bot.sendMessage(msg.channel, "heads!");
 			else if (dx === 2 ) Bot.sendMessage(msg.channel, "tails!");
@@ -222,19 +208,15 @@ Bot.on("message", function (msg) {
 				);
 			}
 		}
-		// END GENERAL COMMANDS //
-
-		// BGN MOD TOOLS //
-		if (args[0] === "modtools") {
-			if(Opt.users.mods.indexOf(msg.author.id) != -1) {
-				superLog("Modtools invoked by " +
-					msg.author.username + "#" +
-					msg.author.discriminator
-				);
-			}
-			// modtools here
+    if (args[0] === "status") {
+			var hstat = "I can see:\n" +
+				"     " + Bot.servers.length + " servers\n" +
+				"     " + Bot.channels.length + " channels\n" +
+				"     " + Bot.users.length + " users\n" +
+				"I have been up for " + Bot.uptime + "ms\n";
+			Bot.sendMessage(msg.channel, hstat);
 		}
-		// END MOD TOOLS //
+		// END GENERAL COMMANDS //
 
 		// BGN MUSIC TOOLS //
 		if (args[0] === "music") {
@@ -271,6 +253,24 @@ Bot.on("message", function (msg) {
 			}
 		}
 		// END MUSIC TOOLS //
+
+		// BGN MOD TOOLS //
+		if (args[0] === "modtools" && isModOrAdmin(msg.author.id)) {
+			superLog("Modtools invoked by " +
+				msg.author.username + "#" +
+				msg.author.discriminator
+			);
+			// modtools here
+		}
+		// END MOD TOOLS //
+
+		// BGN ADMIN TOOLS //
+		if (args[0] === "admintools" && isAdmin(msg.author.id)) {
+			superLog("Admin tools active");
+		}
+		// END ADMIN TOOLS //
+
+
 	}
 	// END COMMAND PARSING
 });
