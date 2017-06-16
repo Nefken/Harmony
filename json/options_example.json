@@ -1,16 +1,16 @@
 {
   "auth" : {
-    "token": "YOUR CLIENT ID"
+    "token": "MzI1MjA4Njc0NDI1NTAzNzQ0.DCU5zg.9TUHcSPXefAXDNbiO7Umf8vXNgw"
   },
   "music" :{
-    "voiceChannel" : "harmony <- THE DEFAULT VOICE CHANNEL",
+    "voiceChannel" : "none",
     "options" : {
       "modUseOnly" : "0"
     }
   },
   "users" : {
     "admins" : [
-      "YOUR ID"
+      "264170906367033345"
     ],
     "mods" : [
       "YOUR ID",
