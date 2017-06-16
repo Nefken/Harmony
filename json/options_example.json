@@ -1,6 +1,6 @@
 {
   "auth" : {
-    "token": "MzI1MjA4Njc0NDI1NTAzNzQ0.DCU5zg.9TUHcSPXefAXDNbiO7Umf8vXNgw"
+    "token": "Your Token"
   },
   "music" :{
     "voiceChannel" : "none",
@@ -10,7 +10,7 @@
   },
   "users" : {
     "admins" : [
-      "264170906367033345"
+      "YOUR ID"
     ],
     "mods" : [
       "YOUR ID",
